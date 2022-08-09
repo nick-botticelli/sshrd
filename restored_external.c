@@ -40,7 +40,7 @@ get_service(const char *name, unsigned int retry)
 
     while (1) {
         CFRetain(match);
-        service = IOServiceGetMatchingService(kIOMasterPortDefault, match);
+        service = IOServiceGetMatchingService(kIOMainPortDefault, match);
         if (service || !retry--) {
             break;
         }
