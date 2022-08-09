@@ -1,0 +1,44 @@
+name: Build with Make
+
+on: push
+
+jobs:
+  build:
+    runs-on: macos-latest
+    
+    steps:
+    - uses: actions/checkout@v3.0.2
+    - name: Copy macOS IOKit headers
+      run: sudo cp -r $(xcrun --sdk macosx --show-sdk-path)/System/Library/Frameworks/IOKit.framework/Headers $(xcrun --sdk iphoneos --show-sdk-path)/System/Library/Frameworks/IOKit.framework && sudo cp $(xcrun --sdk macosx --show-sdk-path)/usr/include/libkern/OSTypes.h $(xcrun --sdk iphoneos --show-sdk-path)/usr/include/libkern
+    - name: Make project
+      run: make
+    - uses: actions/upload-artifact@v3.1.0
+      with:
+        name: restored_external
+        path: restored_external
+
+  release:
+    needs: build
+    runs-on: macos-latest
+
+    steps:
+    - uses: actions/checkout@v3.0.2
+    - name: Download artifact
+      uses: actions/download-artifact@v3.0.0
+      with:
+        name: restored_external
+        path: restored_external
+    - name: Set environment variables and zip
+      run: |
+        echo "BUILD_VERSION_NUM=$(echo "$(git rev-list --count HEAD | tr -d '\n')")" >> $GITHUB_ENV
+        echo "BUILD_VERSION_SHA=$(echo "$(git rev-parse HEAD | tr -d '\n'])")" >> $GITHUB_ENV
+        echo "BUILD_VERSION_STR=$(echo "$(git rev-list --count HEAD | tr -d '\n')-$(git rev-parse HEAD | tr -d '\n'])")" >> $GITHUB_ENV
+        echo "COMMIT_MSG=$(echo "$(git log -1 --pretty=%B)")" >> $GITHUB_ENV
+        zip -r sshrd-restored_external-$(git rev-list --count HEAD | tr -d '\n').zip restored_external
+    - name: Publish release
+      uses: softprops/action-gh-release@v0.1.14
+      with:
+        files: sshrd-restored_external-${{ env.BUILD_VERSION_NUM }}.zip
+        tag_name: ${{ env.BUILD_VERSION_NUM }}
+        release_name: Build ${{ env.BUILD_VERSION_STR }}
+        body: ${{ env.COMMIT_MSG }}
