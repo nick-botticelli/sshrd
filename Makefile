@@ -1,6 +1,6 @@
 PROJECT  = restored_external
 
-CC		 = xcrun -sdk iphoneos clang
+CC       = xcrun -sdk iphoneos clang
 CC_FLAGS = -arch arm64 -O3 -fvisibility=hidden -fvisibility-inlines-hidden $(CFLAGS)
 LD_FLAGS = -framework CoreFoundation -framework IOKit $(LDFLAGS)
 STRIP    = xcrun -sdk iphoneos strip
