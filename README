@@ -4,3 +4,5 @@ entitlements and then throw in platform-application=true for good
 measure :)
 
 -xerub
+
+Checkout Github Actions for a compiled build, building requries importing IOKit headers from macos.
