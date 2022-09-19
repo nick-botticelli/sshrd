@@ -8,10 +8,14 @@ jobs:
     
     steps:
     - uses: actions/checkout@v3.0.2
+    - name: Install ldid
+      run: brew install ldid
     - name: Copy macOS IOKit headers
       run: sudo cp -r $(xcrun --sdk macosx --show-sdk-path)/System/Library/Frameworks/IOKit.framework/Headers $(xcrun --sdk iphoneos --show-sdk-path)/System/Library/Frameworks/IOKit.framework && sudo cp $(xcrun --sdk macosx --show-sdk-path)/usr/include/libkern/OSTypes.h $(xcrun --sdk iphoneos --show-sdk-path)/usr/include/libkern
     - name: Make project
       run: make
+    - name: Sign restored_external
+      run: ldid -Srestored_external.ent restored_external
     - uses: actions/upload-artifact@v3.1.0
       with:
         name: restored_external
